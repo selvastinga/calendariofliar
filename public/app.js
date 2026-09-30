@@ -16,10 +16,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const editLocation = document.getElementById('edit-location');
   const editDescription = document.getElementById('edit-description');
 
+  const dayModal = document.getElementById('day-modal');
+  const dayModalClose = document.getElementById('day-modal-close');
+  const dayModalTitle = document.getElementById('day-modal-title');
+  const dayEventsList = document.getElementById('day-events-list');
+  const dayEventsEmpty = document.getElementById('day-events-empty');
+
   let currentEvent = null;
 
   function pad(n) {
     return String(n).padStart(2, '0');
+  }
+
+  function toDateStr(date) {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   function toDatetimeLocalValue(date) {
@@ -39,6 +49,24 @@ document.addEventListener('DOMContentLoaded', () => {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   });
+
+  function closeDayModal() {
+    dayModal.classList.add('hidden');
+  }
+  dayModalClose.addEventListener('click', closeDayModal);
+  dayModal.addEventListener('click', (e) => {
+    if (e.target === dayModal) closeDayModal();
+  });
+
+  function openEventModal(event) {
+    currentEvent = event;
+    showViewMode();
+    modalTitle.textContent = event.title;
+    modalDate.textContent = '🕒 ' + event.start.toLocaleString('es-AR');
+    modalLocation.textContent = event.extendedProps.location ? '📍 ' + event.extendedProps.location : '';
+    modalDescription.textContent = event.extendedProps.description || '';
+    modal.classList.remove('hidden');
+  }
 
   btnEdit.addEventListener('click', () => {
     if (!currentEvent) return;
@@ -118,13 +146,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     eventClick: (info) => {
-      currentEvent = info.event;
-      showViewMode();
-      modalTitle.textContent = currentEvent.title;
-      modalDate.textContent = '🕒 ' + currentEvent.start.toLocaleString('es-AR');
-      modalLocation.textContent = currentEvent.extendedProps.location ? '📍 ' + currentEvent.extendedProps.location : '';
-      modalDescription.textContent = currentEvent.extendedProps.description || '';
-      modal.classList.remove('hidden');
+      openEventModal(info.event);
+    },
+    dateClick: (info) => {
+      const eventosDelDia = calendar
+        .getEvents()
+        .filter((ev) => toDateStr(ev.start) === info.dateStr)
+        .sort((a, b) => a.start - b.start);
+
+      dayModalTitle.textContent = info.date.toLocaleDateString('es-AR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      });
+
+      dayEventsList.innerHTML = '';
+      dayEventsEmpty.classList.toggle('hidden', eventosDelDia.length > 0);
+
+      eventosDelDia.forEach((ev) => {
+        const li = document.createElement('li');
+        li.className = 'day-event-item';
+        const hora = ev.start.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        li.innerHTML = `<span class="day-event-time">${hora}</span><span class="day-event-title">${ev.title}</span>${ev.extendedProps.location ? `<span class="day-event-location">📍 ${ev.extendedProps.location}</span>` : ''}`;
+        li.addEventListener('click', () => {
+          closeDayModal();
+          openEventModal(ev);
+        });
+        dayEventsList.appendChild(li);
+      });
+
+      dayModal.classList.remove('hidden');
     },
   });
 

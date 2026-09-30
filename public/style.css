@@ -287,6 +287,66 @@ main {
   border-color: var(--verde);
 }
 
+/* Modal de eventos del día */
+#day-modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.15rem;
+  margin: 0 0 1rem 0;
+  padding-right: 1.5rem;
+  text-transform: capitalize;
+}
+
+.day-events-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.day-event-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.65rem 0.8rem;
+  background: #f7f8fa;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.day-event-item:hover {
+  background: rgba(37, 211, 102, 0.12);
+}
+
+.day-event-time {
+  font-weight: 600;
+  color: var(--verde-oscuro);
+  font-size: 0.85rem;
+  min-width: 3.2rem;
+}
+
+.day-event-title {
+  font-weight: 500;
+  flex: 1;
+}
+
+.day-event-location {
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.day-events-empty {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 .hidden {
   display: none;
 }
