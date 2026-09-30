@@ -78,7 +78,7 @@ export async function startWhatsApp() {
 }
 
 async function handleMessage(sock, msg) {
-  if (!msg.message || msg.key.fromMe) return;
+  if (!msg.message) return;
 
   const remoteJid = msg.key.remoteJid;
   const isGroup = remoteJid?.endsWith('@g.us');
