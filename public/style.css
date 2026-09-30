@@ -78,6 +78,62 @@ main {
   z-index: 1;
 }
 
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #25D366;
+  color: white;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+#edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+#edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+#edit-form input,
+#edit-form textarea {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.hidden {
+  display: none;
+}
+
 #calendar .fc-event-title,
 #calendar .fc-event-time {
   overflow: hidden;

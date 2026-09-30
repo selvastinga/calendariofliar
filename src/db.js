@@ -49,4 +49,13 @@ export function deleteEvent(id) {
   return Number(result.changes) > 0;
 }
 
+export function updateEvent(id, { title, eventDate, location, description }) {
+  const result = db
+    .prepare(
+      'UPDATE events SET title = ?, event_date = ?, location = ?, description = ? WHERE id = ?'
+    )
+    .run(title, eventDate, location ?? null, description ?? null, id);
+  return Number(result.changes) > 0;
+}
+
 export default db;
