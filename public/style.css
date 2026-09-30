@@ -1,56 +1,170 @@
 * { box-sizing: border-box; }
 
+:root {
+  --verde: #25D366;
+  --verde-oscuro: #128C4A;
+  --texto: #1f2937;
+  --texto-suave: #6b7280;
+  --fondo: #eef1f5;
+  --borde: #e2e5ea;
+}
+
 body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   margin: 0;
-  background: #f4f6f8;
-  color: #1f2937;
+  background: var(--fondo);
+  color: var(--texto);
 }
 
 header {
-  background: #25D366;
+  background: linear-gradient(135deg, var(--verde) 0%, var(--verde-oscuro) 100%);
   color: white;
-  padding: 1.2rem 1.5rem;
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 2px 10px rgba(18, 140, 74, 0.25);
+}
+
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 header h1 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.5rem;
+  font-family: 'Poppins', sans-serif;
+  margin: 0 0 0.35rem 0;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
 }
 
 .subtitle {
   margin: 0;
-  opacity: 0.9;
-  font-size: 0.9rem;
+  opacity: 0.95;
+  font-size: 0.92rem;
 }
 
 .subtitle code {
-  background: rgba(255, 255, 255, 0.25);
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 0.15rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.85rem;
 }
 
 main {
   max-width: 960px;
-  margin: 1.5rem auto;
-  padding: 0 1rem;
+  margin: 1.75rem auto;
+  padding: 0 1rem 2rem;
 }
 
 #calendar {
   background: white;
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 18px rgba(17, 24, 39, 0.07);
+  border: 1px solid var(--borde);
 }
 
+/* FullCalendar: ajustes de estilo para que combine con el resto */
+#calendar .fc {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+#calendar .fc-toolbar-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.25rem !important;
+  color: var(--texto);
+  text-transform: capitalize;
+}
+
+#calendar .fc-button-primary {
+  background: white;
+  border: 1px solid var(--borde);
+  color: var(--texto);
+  box-shadow: none !important;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+#calendar .fc-button-primary:hover {
+  background: #f3f4f6;
+}
+
+#calendar .fc-button-primary:not(:disabled).fc-button-active,
+#calendar .fc-button-primary:not(:disabled):active {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: white;
+}
+
+#calendar .fc-today-button {
+  font-weight: 600;
+}
+
+#calendar .fc-daygrid-day.fc-day-today {
+  background: rgba(37, 211, 102, 0.08);
+}
+
+#calendar .fc-col-header-cell {
+  background: #fafbfc;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--texto-suave);
+  padding: 0.5rem 0;
+}
+
+#calendar .fc-daygrid-day-number {
+  color: var(--texto);
+  font-weight: 500;
+  padding: 0.35rem;
+}
+
+#calendar .fc-day-today .fc-daygrid-day-number {
+  background: var(--verde);
+  color: white;
+  border-radius: 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.2rem;
+}
+
+#calendar .fc-event {
+  border: none;
+  background: var(--verde);
+  border-radius: 6px;
+  padding: 1px 4px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+#calendar .fc-event:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+#calendar .fc-daygrid-more-link {
+  color: var(--verde-oscuro);
+  font-weight: 600;
+}
+
+/* Modal */
 .modal {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(17, 24, 39, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal.hidden {
@@ -59,47 +173,82 @@ main {
 
 .modal-content {
   background: white;
-  border-radius: 10px;
-  padding: 1.5rem 2rem;
-  max-width: 400px;
-  width: 90%;
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  max-width: 420px;
+  width: 100%;
   position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+#modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.25rem;
+  margin: 0 0 0.75rem 0;
+  padding-right: 1.5rem;
+}
+
+#modal-date,
+#modal-location,
+#modal-description {
+  margin: 0.35rem 0;
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+}
+
+#modal-description {
+  color: var(--texto);
 }
 
 .modal-close {
   position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
+  top: 0.75rem;
+  right: 0.85rem;
   border: none;
-  background: none;
-  font-size: 1.5rem;
+  background: #f3f4f6;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  line-height: 1;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--texto-suave);
   z-index: 1;
+}
+
+.modal-close:hover {
+  background: #e5e7eb;
 }
 
 .modal-actions {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
 }
 
 .btn {
   border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
   font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: opacity 0.15s ease;
+  font-family: inherit;
+}
+
+.btn:hover {
+  opacity: 0.85;
 }
 
 .btn-primary {
-  background: #25D366;
+  background: var(--verde);
   color: white;
 }
 
 .btn-secondary {
   background: #e5e7eb;
-  color: #1f2937;
+  color: var(--texto);
 }
 
 .btn-danger {
@@ -110,14 +259,15 @@ main {
 #edit-form {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 #edit-form label {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
   font-size: 0.85rem;
+  font-weight: 500;
   color: #374151;
 }
 
@@ -125,9 +275,16 @@ main {
 #edit-form textarea {
   font-family: inherit;
   font-size: 0.95rem;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+#edit-form input:focus,
+#edit-form textarea:focus {
+  border-color: var(--verde);
 }
 
 .hidden {
@@ -148,4 +305,28 @@ main {
 
 #calendar .fc-daygrid-day-events {
   overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  header {
+    padding: 1.25rem 1rem;
+  }
+  header h1 {
+    font-size: 1.3rem;
+  }
+  main {
+    margin: 1rem auto;
+    padding: 0 0.5rem 1.5rem;
+  }
+  #calendar {
+    padding: 0.6rem;
+    border-radius: 10px;
+  }
+  #calendar .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .modal-content {
+    padding: 1.4rem 1.25rem;
+  }
 }
