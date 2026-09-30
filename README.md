@@ -82,22 +82,82 @@ auth_info_baileys/
   credenciales de la sesión de WhatsApp (no se versiona en git)
 ```
 
-## Desplegar en un VPS (recomendado para que quede 24/7)
+## Desplegar en Google Cloud Free Tier (VPS gratis 24/7)
 
-1. Contratá un VPS chico (alcanza con el más básico de DigitalOcean, Hetzner, Railway, etc.).
-2. Instalá Node.js en el servidor.
-3. Subí el proyecto (por ejemplo con `git`, excluyendo `node_modules`, `data/` y `auth_info_baileys/`).
-4. `npm install --production`
-5. Usá [pm2](https://pmdocs.com/) para mantenerlo corriendo y que reinicie solo si se cae:
-   ```bash
-   npm install -g pm2
-   pm2 start "node --experimental-sqlite src/index.js" --name calendario-familiar
-   pm2 save
-   pm2 startup   # sigue las instrucciones para que arranque solo al reiniciar el VPS
-   ```
-6. La primera vez tenés que ver el QR: corré `pm2 logs calendario-familiar` para verlo y escanearlo.
-7. Para ver el calendario desde afuera, abrí el puerto 3000 en el firewall del VPS, o mejor, poné un
-   proxy reverso (nginx/Caddy) con HTTPS delante del puerto 3000.
+### 1. Crear la VM gratuita
+
+1. Entrá a [console.cloud.google.com](https://console.cloud.google.com/) y creá un proyecto nuevo.
+2. Activá la **Compute Engine API** (te lo va a pedir la primera vez que entrás a "VM instances").
+3. Creá una instancia nueva con estos valores (son los que entran en la capa "Always Free"):
+   - **Región**: `us-west1`, `us-central1` o `us-east1` (solo estas tres son gratis).
+   - **Tipo de máquina**: `e2-micro`.
+   - **Imagen de arranque**: Ubuntu 22.04 LTS.
+   - **Disco**: hasta 30GB estándar (incluido en el free tier).
+4. En **Firewall**, marcá "Allow HTTP traffic" (y "Allow HTTPS traffic" si más adelante configurás un dominio).
+5. Creá una regla de firewall extra para el puerto 3000 (Menú → VPC network → Firewall → Create firewall rule):
+   - Target: todas las instancias (o con tag `http-server`)
+   - Rango de IPs origen: `0.0.0.0/0`
+   - Protocolos y puertos: TCP `3000`
+
+### 2. Conectarte por SSH
+
+Desde la lista de instancias en la consola, hacé clic en el botón **SSH** al lado de tu VM (abre una
+terminal en el navegador, no necesitás configurar claves).
+
+### 3. Subir tu código a GitHub (una sola vez, desde tu PC)
+
+```powershell
+git remote add origin https://github.com/TU-USUARIO/TU-REPO.git
+git branch -M main
+git push -u origin main
+```
+(Creá antes el repo vacío en github.com, podés dejarlo **privado**.)
+
+### 4. Instalar todo en el VPS (dentro de la terminal SSH del paso 2)
+
+```bash
+chmod +x scripts/setup-vps.sh   # si ya clonaste el repo manualmente, si no, bajá el script primero
+curl -o setup-vps.sh https://raw.githubusercontent.com/TU-USUARIO/TU-REPO/main/scripts/setup-vps.sh
+chmod +x setup-vps.sh
+./setup-vps.sh https://github.com/TU-USUARIO/TU-REPO.git
+```
+
+Esto instala Node.js, git, pm2, clona tu repo y deja todo listo.
+
+### 5. Arrancar el bot
+
+```bash
+cd calendario-familiar
+pm2 start "node --experimental-sqlite src/index.js" --name calendario-familiar
+pm2 logs calendario-familiar   # acá ves el QR, escaneálo con WhatsApp
+```
+
+Configurá el `GROUP_ID` como se explica más arriba (editá `.env` con `nano .env`, después
+`pm2 restart calendario-familiar`).
+
+Para que el bot sobreviva a un reinicio del servidor:
+```bash
+pm2 save
+pm2 startup   # copiá y corré el comando que te sugiere
+```
+
+### 6. Ver el calendario
+
+Buscá la **IP externa** de tu VM en la consola de Google Cloud y entrá a:
+`http://IP_EXTERNA:3000`
+
+### 7. Actualizar el bot en el futuro
+
+Desde tu PC, hacé los cambios, `git push`. Después en el VPS:
+```bash
+cd calendario-familiar
+./scripts/update-vps.sh
+```
+
+### Opcional: dominio propio + HTTPS
+
+Si más adelante querés entrar con un nombre en vez de la IP, instalá `nginx` como proxy reverso hacia
+el puerto 3000 y usá `certbot` para un certificado gratis de Let's Encrypt.
 
 ## Próximos pasos posibles
 
