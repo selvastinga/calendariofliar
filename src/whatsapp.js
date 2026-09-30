@@ -30,6 +30,7 @@ function formatEventoLine(ev) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'America/Argentina/Buenos_Aires',
   });
   const lugar = ev.location ? ` @ ${ev.location}` : '';
   return `#${ev.id} - ${ev.title} - ${fechaTexto}${lugar}`;
