@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const UTC_OFFSET = process.env.UTC_OFFSET || '-03:00';
 
 // Fecha/hora actual en huso horario de Argentina, para resolver fechas relativas ("mañana", "el sábado").
