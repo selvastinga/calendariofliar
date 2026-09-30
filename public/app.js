@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initialView: 'dayGridMonth',
     locale: 'es',
     height: 'auto',
+    dayMaxEvents: true,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
