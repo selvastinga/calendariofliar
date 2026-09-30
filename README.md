@@ -46,20 +46,34 @@ La primera vez va a aparecer un código QR en la terminal. Abrí WhatsApp en tu 
 ## Comandos disponibles en el grupo
 
 ```
-/evento Título | DD/MM/AAAA HH:MM | Lugar | Descripción
+/evento <contale el evento como quieras>
 ```
-`Lugar` y `Descripción` son opcionales. Si no ponés hora, asume 09:00.
+Un modelo de IA (Google Gemini) interpreta el texto y extrae título, fecha, hora, lugar y descripción.
+No hace falta ningún formato fijo.
 
 Ejemplos:
 ```
-/evento Cumple de Juan | 15/10/2026 18:00 | Casa de la abuela
-/evento Reunión de padres | 03/11/2026 19:30
+/evento el sábado 3/10 a las 18hs cumple Juan en casa de la abuela
+/evento reunión de padres el martes que viene a las 19:30
+/evento turno con el dentista mañana a la mañana
 ```
 
 Otros comandos:
 - `/eventos` — lista los próximos eventos cargados
 - `/borrar ID` — borra un evento por su número (el ID lo muestra `/eventos`)
 - `/ayuda` — muestra la ayuda
+
+### Configurar la IA (Google Gemini, gratis)
+
+1. Entrá a [aistudio.google.com/apikey](https://aistudio.google.com/apikey) con tu cuenta de Google.
+2. Creá una API key nueva (botón "Create API key").
+3. Copiala en el `.env` del servidor:
+   ```
+   GEMINI_API_KEY=tu-api-key-aca
+   ```
+4. Reiniciá el bot (`pm2 restart calendario-familiar`).
+
+La capa gratuita de Gemini alcanza de sobra para el volumen de mensajes de un grupo familiar.
 
 ## Ver el calendario
 

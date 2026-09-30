@@ -2,16 +2,17 @@ import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@whiskeys
 import pino from 'pino';
 import qrcode from 'qrcode-terminal';
 import { insertEvent, listUpcomingEvents, deleteEvent } from './db.js';
-import { parseEventoCommand, parseBorrarCommand } from './eventParser.js';
+import { parseBorrarCommand } from './eventParser.js';
+import { parseEventoConIA } from './aiParser.js';
 
 const logger = pino({ level: 'silent' });
 
 const HELP_TEXT = `*Comandos disponibles*
 
-📅 Cargar un evento:
-/evento Título | DD/MM/AAAA HH:MM | Lugar | Descripción
-(Lugar y Descripción son opcionales)
-Ej: /evento Cumple de Juan | 15/10/2026 18:00 | Casa de la abuela
+📅 Cargar un evento (escribilo como quieras, la IA lo entiende):
+/evento <descripción del evento>
+Ej: /evento el sábado 3/10 a las 18hs cumple Juan en casa de la abuela
+Ej: /evento reunión de padres el martes que viene a las 19:30
 
 📋 Ver próximos eventos:
 /eventos
@@ -107,14 +108,30 @@ async function handleMessage(sock, msg) {
   }
 
   if (/^\/evento\b/i.test(text)) {
-    const parsed = parseEventoCommand(text);
+    const textoLibre = text.trim().replace(/^\/evento\s*/i, '');
+    if (!textoLibre) {
+      await sock.sendMessage(remoteJid, {
+        text: '⚠️ Contame el evento después de /evento. Ej: /evento el sábado a las 18hs cumple Juan en casa de la abuela',
+      });
+      return;
+    }
+    await sock.sendMessage(remoteJid, { text: '🤖 Analizando el evento...' });
+    const parsed = await parseEventoConIA(textoLibre);
     if (parsed.error) {
       await sock.sendMessage(remoteJid, { text: `⚠️ ${parsed.error}` });
       return;
     }
     const id = insertEvent({ ...parsed, createdBy: sender });
+    const fechaTexto = new Date(parsed.eventDate).toLocaleString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'America/Argentina/Buenos_Aires',
+    });
     await sock.sendMessage(remoteJid, {
-      text: `✅ Evento cargado (#${id}): *${parsed.title}*`,
+      text: `✅ Evento cargado (#${id}): *${parsed.title}* - ${fechaTexto}${parsed.location ? ` @ ${parsed.location}` : ''}`,
     });
     return;
   }
