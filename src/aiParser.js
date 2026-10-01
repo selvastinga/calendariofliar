@@ -1,6 +1,7 @@
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 const UTC_OFFSET = process.env.UTC_OFFSET || '-03:00';
+const PERSONAS = ['Ariel', 'Selva', 'Ema'];
 
 // Fecha/hora actual en huso horario de Argentina, para resolver fechas relativas ("mañana", "el sábado").
 function nowEnArgentina() {
@@ -14,8 +15,9 @@ function buildPrompt(texto) {
 
   return `Sos un asistente que extrae datos de eventos de calendario a partir de mensajes de WhatsApp en español rioplatense.
 Hoy es ${diaSemana} ${fechaHoy} (huso horario Argentina, UTC-3).
+Los integrantes de la familia son: ${PERSONAS.join(', ')}.
 Interpretá el siguiente mensaje y devolvé SOLO un JSON con esta forma exacta, sin texto adicional ni markdown:
-{"title": string, "date": "YYYY-MM-DD", "time": "HH:MM" o null, "location": string o null, "description": string o null, "error": string o null}
+{"title": string, "date": "YYYY-MM-DD", "time": "HH:MM" o null, "location": string o null, "description": string o null, "person": "Ariel" | "Selva" | "Ema" | null, "error": string o null}
 
 Reglas:
 - Si el mensaje no describe un evento con fecha identificable, devolvé {"error": "no pude entender el evento"} y el resto de los campos en null.
@@ -23,6 +25,7 @@ Reglas:
 - Resolvé fechas relativas ("mañana", "el sábado", "el 15") usando la fecha de hoy de arriba.
 - "title" tiene que ser un resumen corto (máximo 60 caracteres) del evento.
 - "description" solo si hay detalles extra que no entran en el título; si no, null.
+- "person" solo si el mensaje menciona explícitamente que el evento es de Ariel, Selva o Ema (ej: "turno de Ema", "evento de Ariel"); si no se menciona a ninguno, dejalo en null.
 
 Mensaje: "${texto}"`;
 }
@@ -82,5 +85,6 @@ export async function parseEventoConIA(texto) {
     eventDate: fecha.toISOString(),
     location: parsed.location || null,
     description: parsed.description || null,
+    person: PERSONAS.includes(parsed.person) ? parsed.person : null,
   };
 }

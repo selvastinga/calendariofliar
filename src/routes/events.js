@@ -10,11 +10,11 @@ router.get('/events', (req, res) => {
 });
 
 router.put('/events/:id', (req, res) => {
-  const { title, eventDate, location, description } = req.body;
+  const { title, eventDate, location, description, person } = req.body;
   if (!title || !eventDate) {
     return res.status(400).json({ error: 'Faltan campos obligatorios (title, eventDate)' });
   }
-  const ok = updateEvent(Number(req.params.id), { title, eventDate, location, description });
+  const ok = updateEvent(Number(req.params.id), { title, eventDate, location, description, person });
   if (!ok) return res.status(404).json({ error: 'Evento no encontrado' });
   res.json({ ok: true });
 });

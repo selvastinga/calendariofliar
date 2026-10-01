@@ -17,6 +17,11 @@
     <div class="header-inner">
       <h1>📅 Calendario Familiar</h1>
       <p class="subtitle">Escribí <code>/evento</code> en el grupo de WhatsApp para cargar una actividad</p>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" data-person="Ariel"></span>Ariel</span>
+        <span class="legend-item"><span class="legend-dot" data-person="Selva"></span>Selva</span>
+        <span class="legend-item"><span class="legend-dot" data-person="Ema"></span>Ema</span>
+      </div>
     </div>
   </header>
   <main>
@@ -28,6 +33,7 @@
 
       <div id="view-mode">
         <h2 id="modal-title"></h2>
+        <p id="modal-person"></p>
         <p id="modal-date"></p>
         <p id="modal-location"></p>
         <p id="modal-description"></p>
@@ -46,6 +52,14 @@
         </label>
         <label>Lugar
           <input type="text" id="edit-location" />
+        </label>
+        <label>Quién
+          <select id="edit-person">
+            <option value="">Sin asignar</option>
+            <option value="Ariel">Ariel</option>
+            <option value="Selva">Selva</option>
+            <option value="Ema">Ema</option>
+          </select>
         </label>
         <label>Descripción
           <textarea id="edit-description" rows="3"></textarea>

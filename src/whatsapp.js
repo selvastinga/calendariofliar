@@ -12,7 +12,8 @@ const HELP_TEXT = `*Comandos disponibles*
 📅 Cargar un evento (escribilo como quieras, la IA lo entiende):
 /evento <descripción del evento>
 Ej: /evento el sábado 3/10 a las 18hs cumple Juan en casa de la abuela
-Ej: /evento reunión de padres el martes que viene a las 19:30
+Ej: /evento turno de Ema con el dentista el martes a las 19:30
+(Si mencionás a Ariel, Selva o Ema, el evento queda asignado a esa persona)
 
 📋 Ver próximos eventos:
 /eventos
@@ -34,7 +35,8 @@ function formatEventoLine(ev) {
     timeZone: 'America/Argentina/Buenos_Aires',
   });
   const lugar = ev.location ? ` @ ${ev.location}` : '';
-  return `#${ev.id} - ${ev.title} - ${fechaTexto}${lugar}`;
+  const persona = ev.person ? ` (${ev.person})` : '';
+  return `#${ev.id} - ${ev.title} - ${fechaTexto}${lugar}${persona}`;
 }
 
 export async function startWhatsApp() {
@@ -131,7 +133,7 @@ async function handleMessage(sock, msg) {
       timeZone: 'America/Argentina/Buenos_Aires',
     });
     await sock.sendMessage(remoteJid, {
-      text: `✅ Evento cargado (#${id}): *${parsed.title}* - ${fechaTexto}${parsed.location ? ` @ ${parsed.location}` : ''}`,
+      text: `✅ Evento cargado (#${id}): *${parsed.title}* - ${fechaTexto}${parsed.location ? ` @ ${parsed.location}` : ''}${parsed.person ? ` (${parsed.person})` : ''}`,
     });
     return;
   }

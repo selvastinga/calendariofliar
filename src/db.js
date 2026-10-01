@@ -14,17 +14,31 @@ db.exec(`
     event_date TEXT NOT NULL,
     location TEXT,
     description TEXT,
+    person TEXT,
     created_by TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   )
 `);
 
-export function insertEvent({ title, eventDate, location, description, createdBy }) {
+// Migracion: agrega la columna person si la base venia de una version anterior sin ella.
+const columnas = db.prepare("PRAGMA table_info(events)").all();
+if (!columnas.some((c) => c.name === 'person')) {
+  db.exec('ALTER TABLE events ADD COLUMN person TEXT');
+}
+
+export function insertEvent({ title, eventDate, location, description, person, createdBy }) {
   const stmt = db.prepare(`
-    INSERT INTO events (title, event_date, location, description, created_by)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO events (title, event_date, location, description, person, created_by)
+    VALUES (?, ?, ?, ?, ?, ?)
   `);
-  const result = stmt.run(title, eventDate, location ?? null, description ?? null, createdBy ?? null);
+  const result = stmt.run(
+    title,
+    eventDate,
+    location ?? null,
+    description ?? null,
+    person ?? null,
+    createdBy ?? null
+  );
   return Number(result.lastInsertRowid);
 }
 
@@ -49,12 +63,12 @@ export function deleteEvent(id) {
   return Number(result.changes) > 0;
 }
 
-export function updateEvent(id, { title, eventDate, location, description }) {
+export function updateEvent(id, { title, eventDate, location, description, person }) {
   const result = db
     .prepare(
-      'UPDATE events SET title = ?, event_date = ?, location = ?, description = ? WHERE id = ?'
+      'UPDATE events SET title = ?, event_date = ?, location = ?, description = ?, person = ? WHERE id = ?'
     )
-    .run(title, eventDate, location ?? null, description ?? null, id);
+    .run(title, eventDate, location ?? null, description ?? null, person ?? null, id);
   return Number(result.changes) > 0;
 }
 

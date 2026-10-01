@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('modal');
   const viewMode = document.getElementById('view-mode');
   const modalTitle = document.getElementById('modal-title');
+  const modalPerson = document.getElementById('modal-person');
   const modalDate = document.getElementById('modal-date');
   const modalLocation = document.getElementById('modal-location');
   const modalDescription = document.getElementById('modal-description');
@@ -14,7 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const editTitle = document.getElementById('edit-title');
   const editDatetime = document.getElementById('edit-datetime');
   const editLocation = document.getElementById('edit-location');
+  const editPerson = document.getElementById('edit-person');
   const editDescription = document.getElementById('edit-description');
+
+  const PERSON_COLORS = {
+    Ariel: '#3b82f6',
+    Selva: '#ec4899',
+    Ema: '#f59e0b',
+  };
+  const DEFAULT_COLOR = '#25D366';
 
   const dayModal = document.getElementById('day-modal');
   const dayModalClose = document.getElementById('day-modal-close');
@@ -61,7 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function openEventModal(event) {
     currentEvent = event;
     showViewMode();
+    const persona = event.extendedProps.person;
     modalTitle.textContent = event.title;
+    modalPerson.innerHTML = persona
+      ? `<span class="person-dot" style="background:${PERSON_COLORS[persona]}"></span>${persona}`
+      : '';
     modalDate.textContent = '🕒 ' + event.start.toLocaleString('es-AR');
     modalLocation.textContent = event.extendedProps.location ? '📍 ' + event.extendedProps.location : '';
     modalDescription.textContent = event.extendedProps.description || '';
@@ -73,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     editTitle.value = currentEvent.title;
     editDatetime.value = toDatetimeLocalValue(currentEvent.start);
     editLocation.value = currentEvent.extendedProps.location || '';
+    editPerson.value = currentEvent.extendedProps.person || '';
     editDescription.value = currentEvent.extendedProps.description || '';
     viewMode.classList.add('hidden');
     editForm.classList.remove('hidden');
@@ -101,6 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title: editTitle.value.trim(),
       eventDate: new Date(editDatetime.value).toISOString(),
       location: editLocation.value.trim() || null,
+      person: editPerson.value || null,
       description: editDescription.value.trim() || null,
     };
     const res = await fetch(`/api/events/${currentEvent.id}`, {
@@ -135,9 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
             id: ev.id,
             title: ev.title,
             start: ev.event_date,
+            backgroundColor: PERSON_COLORS[ev.person] || DEFAULT_COLOR,
+            borderColor: PERSON_COLORS[ev.person] || DEFAULT_COLOR,
             extendedProps: {
               location: ev.location,
               description: ev.description,
+              person: ev.person,
             },
           }))
         );
@@ -167,7 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const li = document.createElement('li');
         li.className = 'day-event-item';
         const hora = ev.start.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-        li.innerHTML = `<span class="day-event-time">${hora}</span><span class="day-event-title">${ev.title}</span>${ev.extendedProps.location ? `<span class="day-event-location">📍 ${ev.extendedProps.location}</span>` : ''}`;
+        const persona = ev.extendedProps.person;
+        const colorDot = `<span class="person-dot" style="background:${PERSON_COLORS[persona] || DEFAULT_COLOR}"></span>`;
+        li.innerHTML = `${colorDot}<span class="day-event-time">${hora}</span><span class="day-event-title">${ev.title}</span>${ev.extendedProps.location ? `<span class="day-event-location">📍 ${ev.extendedProps.location}</span>` : ''}`;
         li.addEventListener('click', () => {
           closeDayModal();
           openEventModal(ev);
