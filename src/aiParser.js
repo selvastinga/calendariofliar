@@ -30,31 +30,51 @@ Reglas:
 Mensaje: "${texto}"`;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Reintenta cuando Gemini está temporalmente saturado (503) o con límite de uso (429).
+const REINTENTOS = 2;
+const ESPERA_MS = 1500;
+
 export async function parseEventoConIA(texto) {
   if (!GEMINI_API_KEY) {
     return { error: 'Falta configurar GEMINI_API_KEY en el servidor (ver README).' };
   }
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: buildPrompt(texto) }] }],
+    generationConfig: { responseMimeType: 'application/json' },
+  });
 
   let res;
-  try {
-    res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: buildPrompt(texto) }] }],
-        generationConfig: { responseMimeType: 'application/json' },
-      }),
-    });
-  } catch (err) {
-    console.error('Error de red contactando a Gemini:', err);
-    return { error: 'No se pudo contactar al servicio de IA.' };
-  }
+  for (let intento = 0; intento <= REINTENTOS; intento++) {
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+      });
+    } catch (err) {
+      console.error('Error de red contactando a Gemini:', err);
+      return { error: 'No se pudo contactar al servicio de IA.' };
+    }
 
-  if (!res.ok) {
+    if (res.ok) break;
+    if ((res.status === 503 || res.status === 429) && intento < REINTENTOS) {
+      console.warn(`Gemini respondió ${res.status}, reintentando (${intento + 1}/${REINTENTOS})...`);
+      await sleep(ESPERA_MS);
+      continue;
+    }
     console.error('Error de Gemini:', res.status, await res.text());
-    return { error: 'El servicio de IA no respondió correctamente.' };
+    return {
+      error:
+        res.status === 503
+          ? 'El servicio de IA está saturado en este momento, probá de nuevo en un minuto.'
+          : 'El servicio de IA no respondió correctamente.',
+    };
   }
 
   const data = await res.json();
