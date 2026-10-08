@@ -76,6 +76,29 @@ header h1 {
 .legend-dot[data-person="Selva"] { background: #ec4899; }
 .legend-dot[data-person="Ema"] { background: #f59e0b; }
 
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+}
+
+.filter-bar select {
+  font-family: inherit;
+  font-size: 0.88rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  cursor: pointer;
+}
+
+.filter-bar select option {
+  color: var(--texto);
+}
+
 #modal-person {
   display: flex;
   align-items: center;

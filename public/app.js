@@ -30,8 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const dayModalTitle = document.getElementById('day-modal-title');
   const dayEventsList = document.getElementById('day-events-list');
   const dayEventsEmpty = document.getElementById('day-events-empty');
+  const personFilter = document.getElementById('person-filter');
 
   let currentEvent = null;
+  let filtroPersona = '';
+
+  personFilter.addEventListener('change', () => {
+    filtroPersona = personFilter.value;
+    calendar.refetchEvents();
+  });
 
   function pad(n) {
     return String(n).padStart(2, '0');
@@ -144,7 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
     events: async (info, successCallback, failureCallback) => {
       try {
         const res = await fetch('/api/events');
-        const eventos = await res.json();
+        let eventos = await res.json();
+        if (filtroPersona) {
+          eventos = eventos.filter((ev) => ev.person === filtroPersona);
+        }
         successCallback(
           eventos.map((ev) => ({
             id: ev.id,
