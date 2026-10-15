@@ -72,4 +72,18 @@ export function updateEvent(id, { title, eventDate, location, description, perso
   return Number(result.changes) > 0;
 }
 
+export function getEventsForDay(date) {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const startIso = startOfDay.toISOString();
+  const endIso = endOfDay.toISOString();
+
+  return db
+    .prepare('SELECT * FROM events WHERE event_date >= ? AND event_date <= ? ORDER BY event_date ASC')
+    .all(startIso, endIso);
+}
+
 export default db;

@@ -1,11 +1,14 @@
 import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@whiskeysockets/baileys';
 import pino from 'pino';
 import qrcode from 'qrcode-terminal';
-import { insertEvent, listUpcomingEvents, deleteEvent } from './db.js';
+import cron from 'node-cron';
+import { insertEvent, listUpcomingEvents, deleteEvent, getEventsForDay } from './db.js';
 import { parseBorrarCommand } from './eventParser.js';
 import { parseEventoConIA } from './aiParser.js';
 
 const logger = pino({ level: 'silent' });
+
+let whatsappSocket = null;
 
 const HELP_TEXT = `*Comandos disponibles*
 
@@ -39,6 +42,35 @@ function formatEventoLine(ev) {
   return `#${ev.id} - ${ev.title} - ${fechaTexto}${lugar}${persona}`;
 }
 
+async function sendDailyAlert() {
+  if (!whatsappSocket) return;
+  if (!process.env.GROUP_ID) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const eventos = getEventsForDay(today);
+
+  if (eventos.length === 0) return;
+
+  const lista = eventos.map(formatEventoLine).join('\n');
+  const mensaje = `📅 *Eventos de hoy*\n\n${lista}`;
+
+  try {
+    await whatsappSocket.sendMessage(process.env.GROUP_ID, { text: mensaje });
+    console.log('✅ Alerta diaria enviada');
+  } catch (err) {
+    console.error('Error enviando alerta diaria:', err);
+  }
+}
+
+function setupDailyAlert() {
+  cron.schedule('0 7 * * *', () => {
+    console.log('🕖 Enviando alerta diaria...');
+    sendDailyAlert();
+  }, { timezone: 'America/Argentina/Buenos_Aires' });
+  console.log('⏰ Alerta diaria programada para las 07:00 (Argentina)');
+}
+
 export async function startWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
 
@@ -47,6 +79,8 @@ export async function startWhatsApp() {
     logger,
     printQRInTerminal: false,
   });
+
+  whatsappSocket = sock;
 
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect, qr } = update;
@@ -63,6 +97,7 @@ export async function startWhatsApp() {
       if (shouldReconnect) startWhatsApp();
     } else if (connection === 'open') {
       console.log('✅ Conectado a WhatsApp.');
+      setupDailyAlert();
     }
   });
 
