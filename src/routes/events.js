@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { listEvents, deleteEvent, updateEvent } from '../db.js';
+import { listEvents, deleteEvent, updateEvent, insertEvent } from '../db.js';
 
 const router = Router();
 
@@ -7,6 +7,15 @@ router.get('/events', (req, res) => {
   const { from, to } = req.query;
   const events = listEvents(from && to ? { from, to } : undefined);
   res.json(events);
+});
+
+router.post('/events', (req, res) => {
+  const { title, eventDate, location, description, person } = req.body;
+  if (!title || !eventDate) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios (title, eventDate)' });
+  }
+  const id = insertEvent({ title, eventDate, location, description, person });
+  res.status(201).json({ id, ok: true });
 });
 
 router.put('/events/:id', (req, res) => {

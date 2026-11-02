@@ -31,9 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const dayEventsList = document.getElementById('day-events-list');
   const dayEventsEmpty = document.getElementById('day-events-empty');
   const personFilter = document.getElementById('person-filter');
+  const btnCreateEvent = document.getElementById('btn-create-event');
 
   let currentEvent = null;
   let filtroPersona = '';
+  let selectedDateForCreation = null;
 
   personFilter.addEventListener('change', () => {
     filtroPersona = personFilter.value;
@@ -115,29 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  editForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!currentEvent) return;
-    const payload = {
-      title: editTitle.value.trim(),
-      eventDate: new Date(editDatetime.value).toISOString(),
-      location: editLocation.value.trim() || null,
-      person: editPerson.value || null,
-      description: editDescription.value.trim() || null,
-    };
-    const res = await fetch(`/api/events/${currentEvent.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-      calendar.refetchEvents();
-      closeModal();
-    } else {
-      alert('No se pudo guardar el evento.');
-    }
-  });
-
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     locale: 'es',
@@ -177,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
       openEventModal(info.event);
     },
     dateClick: (info) => {
+      selectedDateForCreation = info.date;
       const eventosDelDia = calendar
         .getEvents()
         .filter((ev) => toDateStr(ev.start) === info.dateStr)
@@ -207,6 +187,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
       dayModal.classList.remove('hidden');
     },
+  });
+
+  btnCreateEvent.addEventListener('click', async () => {
+    if (!selectedDateForCreation) return;
+    closeDayModal();
+
+    editTitle.value = '';
+    editDatetime.value = toDatetimeLocalValue(selectedDateForCreation);
+    editLocation.value = '';
+    editPerson.value = '';
+    editDescription.value = '';
+
+    currentEvent = null;
+    viewMode.classList.add('hidden');
+    editForm.classList.remove('hidden');
+    modal.classList.remove('hidden');
+  });
+
+  editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      title: editTitle.value.trim(),
+      eventDate: new Date(editDatetime.value).toISOString(),
+      location: editLocation.value.trim() || null,
+      person: editPerson.value || null,
+      description: editDescription.value.trim() || null,
+    };
+
+    let res;
+    if (currentEvent) {
+      res = await fetch(`/api/events/${currentEvent.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    if (res.ok) {
+      calendar.refetchEvents();
+      closeModal();
+    } else {
+      alert('No se pudo guardar el evento.');
+    }
   });
 
   calendar.render();
